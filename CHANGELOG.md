@@ -45,6 +45,10 @@ All notable changes to this project are documented here. The format is based on
   `bump_actual` / `bump_match` against the agent's predicted `version_bump` (tags with or
   without a leading `v`, and missing-patch/pre-release forms, all parse). The released version
   is read only from genuine release subjects, so a dependency bump can't skew the bump level.
+- Scoring policy: `backlog_recall` remains an inspectable diagnostic in `objective_score`, but
+  it is intentionally excluded from `objective_component` and the blended `composite_score`, so
+  ranking does not shift between enriched and git-only backlog availability; regressions now
+  cover empty, addressed, and matched backlog cases (#148).
 
 ### Fixed
 - Judge robustness (follow-up to #54): the offline substance heuristic keyed only on

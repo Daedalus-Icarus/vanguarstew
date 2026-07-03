@@ -52,10 +52,35 @@ def test_objective_component_falls_back_to_plain_recall_when_unweighted():
     assert objective_component({"module_recall": 0.4, "weighted_module_recall": None}) == 0.4
 
 
+def test_objective_component_ignores_backlog_recall():
+    empty = {"module_recall": 0.5, "backlog_recall": 0.0,
+             "addressed_issue_numbers": [], "matched_issue_numbers": []}
+    addressed = {"module_recall": 0.5, "backlog_recall": 0.0,
+                 "addressed_issue_numbers": [12], "matched_issue_numbers": []}
+    matched = {"module_recall": 0.5, "backlog_recall": 1.0,
+               "addressed_issue_numbers": [12], "matched_issue_numbers": [12]}
+    assert objective_component(empty) == 0.5
+    assert objective_component(addressed) == 0.5
+    assert objective_component(matched) == 0.5
+
+
 def test_composite_uses_weighted_recall_end_to_end():
     # The composite reflects weighted recall through objective_component (#61).
     obj = {"module_recall": 0.0, "weighted_module_recall": 1.0}
     assert composite_score("tie", obj) == 0.7  # 0.6*0.5 + 0.4*1.0
+
+
+def test_composite_ignores_backlog_recall_for_empty_and_addressed_backlogs():
+    empty = {"module_recall": 0.5, "backlog_recall": 0.0,
+             "addressed_issue_numbers": [], "matched_issue_numbers": []}
+    addressed = {"module_recall": 0.5, "backlog_recall": 0.0,
+                 "addressed_issue_numbers": [12], "matched_issue_numbers": []}
+    matched = {"module_recall": 0.5, "backlog_recall": 1.0,
+               "addressed_issue_numbers": [12], "matched_issue_numbers": [12]}
+    expected = composite_score("A", empty)
+    assert expected == 0.8
+    assert composite_score("A", addressed) == expected
+    assert composite_score("A", matched) == expected
 
 
 def test_composite_blends_judge_and_objective():

@@ -284,7 +284,7 @@ def backlog_recall(plan, revealed, open_issues=None) -> dict:
 
 def objective_score(plan, revealed, version_bump=None, base_version=None,
                     open_issues=None, **_) -> dict:
-    """The deterministic anchor: module recall + commit-kind recall + release/bump match.
+    """The deterministic anchor plus inspectable diagnostics.
 
     When a release appears in the revealed window, the actual bump level (major/minor/patch)
     is derived from the semver delta between `base_version` (the version at freeze T, e.g.
@@ -294,6 +294,9 @@ def objective_score(plan, revealed, version_bump=None, base_version=None,
     `bump_actual` is None when no release is revealed or the base is unknown; `bump_match` is
     True exactly when the agent's normalized prediction equals `bump_actual` (so predicting
     no bump when none happened also counts as a match).
+
+    `backlog_recall` is exposed for inspection when frozen `open_issues` are available, but it
+    is intentionally not score-bearing in `objective_component()` or `composite_score()`.
     """
     result = module_recall(plan, revealed)
     result.update(kind_recall(plan, revealed))
@@ -327,7 +330,9 @@ def objective_component(objective: dict) -> float:
     preferred when present, so the score reflects where change actually concentrated, and it
     falls back to plain ``module_recall`` otherwise. Release-prediction and (when present)
     bump-level correctness count only when there was actually a release to get right, so a
-    window with no release isn't scored on a trivial "predicted nothing" match.
+    window with no release isn't scored on a trivial "predicted nothing" match. `backlog_recall`
+    remains diagnostics-only: backlog availability varies between enriched and git-only runs, so
+    ranking should not change merely because historical issue state was or was not reconstructible.
     """
     recall = objective.get("weighted_module_recall")
     if recall is None:
