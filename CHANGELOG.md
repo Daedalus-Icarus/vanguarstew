@@ -19,6 +19,10 @@ All notable changes to this project are documented here. The format is based on
   and the gap is reported only when both partitions scored a repo (#208).
 
 ### Fixed
+- Leakage: ``agent/context.py::_mask_forward_refs`` (the git-only fallback used when
+  ``.vanguarstew_context.json`` is absent) now masks GitHub deep-links and raw commit SHAs
+  in README/commit text, matching ``benchmark/leakage.strip_forward_refs`` — completing the
+  remaining scope of #283 after #312 added ``#N`` masking only.
 - Tooling: ``scripts/compare_eval`` no longer diffs a placeholder ``composite_mean`` of
   ``0.0`` on partitions or multi-repo runs with ``scored_repos: 0`` as if it were a real
   score — the delta is ``None`` instead of a misleading ``+0.600``-style swing, mirroring
